@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kuzora neKushaina - Operations & Commission Management</title>
+  <style>
+    :root {
+      --primary: #1e3a5f;
+      --primary-dark: #0f172a;
+      --accent: #d97706;
+      --success: #15803d;
+      --danger: #b91c1c;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #cbd5e1;
+      --text: #334155;
+      --text-dark: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 50px;
+    }
+
+    header {
+      background: var(--primary-dark);
+      color: #fff;
+      padding: 1.25rem 1rem;
+      border-bottom: 4px solid var(--accent);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .editable-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #fff;
+      border: 1px dashed transparent;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      outline: none;
+    }
+
+    .editable-title:hover, .editable-title:focus {
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .tagline {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    nav {
+      max-width: 1200px;
+      margin: 1rem auto;
+      padding: 0 1rem;
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: #e2e8f0;
+      border: none;
+      padding: 0.6rem 1rem;
+      font-weight: 600;
+      color: var(--text);
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      color: var(--primary-dark);
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 0.5rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    @media(min-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+
+    .form-group {
+      margin-bottom: 0.85rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: var(--text-dark);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
+    input:focus, select:focus {
+      outline: 2px solid var(--primary);
+      border-color: transparent;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-print { background: #475569; color: #fff; }
+    .btn:hover { opacity: 0.9; }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    th, td {
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: #f1f5f9;
+      color: var(--text-dark);
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-cyclist { background: #e0f2fe; color: #0369a1; }
+    .badge-driver { background: #fef3c7; color: #b45309; }
+    .badge-crew { background: #f3e8ff; color: #7e22ce; }
+
+    .leaderboard-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      background: #fafafa;
+    }
+
+    .leaderboard-rank {
+      font-size: 1.2rem;
+      font-weight: 800;
+      width: 30px;
+      color: var(--accent);
+    }
+
+    .text-danger { color: var(--danger); font-weight: 700; }
+    .text-success { color: var(--success); font-weight: 700; }
+
+    /* Print Template Restrictions */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        padding-bottom: 0;
+      }
+
+      nav, .btn, .no-print, input[type="submit"], form, .delete-btn {
+        display: none !important;
+      }
+
+      header {
+        background: transparent !important;
+        color: #000 !important;
+        border-bottom: 2px solid #000 !important;
+        padding: 0 0 10px 0 !important;
+      }
+
+      .editable-title {
+        color: #000 !important;
+        font-size: 1.6rem !important;
+      }
+
+      .tagline { color: #555 !important; }
+
+      .tab-content {
+        display: block !important;
+        page-break-after: auto;
+      }
+
+      /* Hide worker age strictly during printout */
+      .worker-age, .age-col, td.age-cell, th.age-header {
+        display: none !important;
+      }
+
+      .card {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin-bottom: 25px !important;
+      }
+
+      table {
+        font-size: 8pt !important;
+        border-collapse: collapse !important;
+      }
+
+      th, td {
+        border: 1px solid #444 !important;
+        padding: 4px 6px !important;
+      }
+
+      .print-signatures {
+        display: block !important;
+        margin-top: 40px;
+      }
+    }
+
+    .print-signatures {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <h1 class="editable-title" id="companyName" contenteditable="true" title="Click to edit company name">
+        Kuzora neKushaina Chemical Solutions
+      </h1>
+      <div class="tagline">Daily Field Dispatch, Fleet Reconciliation & Weekly Sales Leaderboard</div>
+    </div>
+  </header>
+
+  <nav class="no-print">
+    <button class="tab-btn active" onclick="switchTab('tab-daily')">Daily Log & Reconciliation</button>
+    <button class="tab-btn" onclick="switchTab('tab-driver')">Driver Trips & Crew</button>
+    <button class="tab-btn" onclick="switchTab('tab-workers')">Worker Directory</button>
+    <button class="tab-btn" onclick="switchTab('tab-reports')">Weekly Reports & Leaderboard</button>
+  </nav>
+
+  <main>
+    <!-- TAB 1: DAILY SALES LOG (CYCLISTS / FIELD AGENTS) -->
+    <section id="tab-daily" class="tab-content active">
+      <div class="card no-print">
+        <h2>Record Daily Field Agent Shift</h2>
+        <form id="dailyShiftForm">
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="logDate" required />
+            </div>
+            <div class="form-group">
+              <label>Worker (Cyclist / Field Agent)</label>
+              <select id="logWorker" required>
+                <option value="">Select Worker</option>
+              </select>
+            </div>
+          </div>
+
+          <table style="margin-bottom: 1rem;">
+            <thead>
+              <tr>
+                <th>Product Line</th>
+                <th>Retail</th>
+                <th>Comm.</th>
+                <th>Issued (AM)</th>
+                <th>Returned</th>
+                <th>Damaged</th>
+                <th>Lost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Wax Polish (300–350ml)</strong></td>
+                <td>$1.00</td>
+                <td>$0.10</td>
+                <td><input type="number" id="waxOut" min="0" value="0" style="width: 70px;" /></td>
+                <td><input type="number" id="waxRet" min="0" value="0" style="width: 70px;" /></td>
+                <td><input type="number" id="waxDam" min="0" value="0" style="width: 70px;" /></td>
+                <td><input type="number" id="waxLost" min="0" value="0" style="width: 70px;" /></td>
+              </tr>
+              <tr>
+                <td><strong>Liquid Polish (250ml)</strong></td>
+                <td>$1.00</td>
+                <td>$0.25</td>
+                <td><input type="number" id="liq250Out" min="0" value="0" style="width: 70px;" /></td>
+                <td><input type="number" id="liq250Ret" min="0" value="0" style="width: 70px;" /></td>
+                <td><input type="number" id="liq250Dam" min="0" value="0" style="width: 70px;" /></td>
+                <td><input type="number" id="liq250Lost" min="0" value="0" style="width: 70px;" /></td>
+              </tr>
+              <tr>
+                <td><strong>Liquid Polish (500ml)</strong></td>
+                <td>$2.00</td>
+                <td>$0.50</td>
+                <td><input type="number" id="liq500Out" min="0" value="0" style="width: 70px;" /></td>
+                <td><input type="number" id="liq500Ret" min="0" value="0" style="width: 70px;" /></td>
+                <td><input type="number" id="liq500Dam" min="0" value="0" style="width: 70px;" /></td>
+                <td><input type="number" id="liq500Lost" min="0" value="0" style="width: 70px;" /></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Total Cash Remitted ($)</label>
+              <input type="number" step="0.01" id="cashRemitted" placeholder="0.00" required />
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+              <button type="submit" class="btn btn-primary" style="width: 100%;">Save Daily Shift Record</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2>Daily Field Agent Shift Reconciliations</h2>
+          <button onclick="window.print()" class="btn btn-print no-print">Print Shift Report</button>
+        </div>
+        <div class="table-container">
+          <table id="dailyTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Worker</th>
+                <th>Sold (Wax/250/500)</th>
+                <th>Lost/Damaged</th>
+                <th>Expected Cash</th>
+                <th>Remitted Cash</th>
+                <th>Difference</th>
+                <th>Commission Due</th>
+                <th class="no-print">Action</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: DRIVER TRIPS & CAR CREW -->
+    <section id="tab-driver" class="tab-content">
+      <div class="card no-print">
+        <h2>Log Vehicle Delivery Trip</h2>
+        <form id="tripForm">
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="tripDate" required />
+            </div>
+            <div class="form-group">
+              <label>Driver</label>
+              <select id="tripDriver" required>
+                <option value="">Select Driver</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Trip Category</label>
+              <select id="tripType" required>
+                <option value="local">Local Run ($5.00)</option>
+                <option value="out">Out of Area Run ($10.00)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Accompanying Car Crew (Hold Ctrl/Cmd to select multiple)</label>
+              <select id="tripCrew" multiple style="height: 80px;"></select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Save Vehicle Trip</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2>Vehicle Logistics & Trip Payouts</h2>
+          <button onclick="window.print()" class="btn btn-print no-print">Print Trip Report</button>
+        </div>
+        <div class="table-container">
+          <table id="tripsTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Driver</th>
+                <th>Trip Scope</th>
+                <th>Driver Pay</th>
+                <th>Crew Members Present</th>
+                <th class="no-print">Action</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: WORKER DIRECTORY -->
+    <section id="tab-workers" class="tab-content">
+      <div class="card no-print">
+        <h2>Register New Worker</h2>
+        <form id="workerForm">
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="workerName" placeholder="e.g. Tendai Moyo" required />
+            </div>
+            <div class="form-group">
+              <label>Worker Role</label>
+              <select id="workerRole" required>
+                <option value="cyclist">Cyclist / Field Agent</option>
+                <option value="driver">Driver</option>
+                <option value="crew">Car Crew</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Worker Age (Confidential - Will not appear on printed sheets)</label>
+              <input type="number" id="workerAge" min="16" max="99" required />
+            </div>
+            <div class="form-group">
+              <label>Phone / Contact</label>
+              <input type="text" id="workerPhone" placeholder="Optional contact number" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success">Save Worker to Directory</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Active Team Directory</h2>
+        <div class="table-container">
+          <table id="workersTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Role</th>
+                <th class="age-header">Age (Internal Only)</th>
+                <th>Contact</th>
+                <th class="no-print">Action</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: REPORTS & LEADERBOARD -->
+    <section id="tab-reports" class="tab-content">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2>Field Agent Performance Leaderboard</h2>
+          <button onclick="window.print()" class="btn btn-print no-print">Print Performance Report</button>
+        </div>
+        <div id="leaderboardList"></div>
+      </div>
+
+      <div class="card">
+        <h2>Consolidated Payout Summary (Commissions & Driver Fees)</h2>
+        <div class="table-container">
+          <table id="summaryTable">
+            <thead>
+              <tr>
+                <th>Worker Name</th>
+                <th>Role</th>
+                <th>Units Sold</th>
+                <th>Lost/Damaged Tally</th>
+                <th>Total Earnings ($)</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="print-signatures">
+        <div style="display: flex; justify-content: space-between; margin-top: 60px;">
+          <div style="border-top: 1px solid #000; width: 220px; text-align: center; padding-top: 5px;">
+            Operations Supervisor
+          </div>
+          <div style="border-top: 1px solid #000; width: 220px; text-align: center; padding-top: 5px;">
+            Managing Director
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // System Data Initialization with LocalStorage
+    const DB = {
+      getWorkers: () => JSON.parse(localStorage.getItem('knk_workers') || '[]'),
+      saveWorkers: (data) => localStorage.setItem('knk_workers', JSON.stringify(data)),
+      getLogs: () => JSON.parse(localStorage.getItem('knk_logs') || '[]'),
+      saveLogs: (data) => localStorage.setItem('knk_logs', JSON.stringify(data)),
+      getTrips: () => JSON.parse(localStorage.getItem('knk_trips') || '[]'),
+      saveTrips: (data) => localStorage.setItem('knk_trips', JSON.stringify(data)),
+      getTitle: () => localStorage.getItem('knk_title') || 'Kuzora neKushaina Chemical Solutions',
+      saveTitle: (title) => localStorage.setItem('knk_title', title)
+    };
+
+    // Navigation Tab Controller
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+      if (tabId === 'tab-reports') renderReports();
+    }
+
+    // Editable Company Title
+    const titleEl = document.getElementById('companyName');
+    titleEl.innerText = DB.getTitle();
+    titleEl.addEventListener('blur', () => DB.saveTitle(titleEl.innerText.trim()));
+
+    // Worker Registration & Render
+    document.getElementById('workerForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const workers = DB.getWorkers();
+      workers.push({
+        id: 'w_' + Date.now(),
+        name: document.getElementById('workerName').value.trim(),
+        role: document.getElementById('workerRole').value,
+        age: document.getElementById('workerAge').value,
+        phone: document.getElementById('workerPhone').value.trim() || 'N/A'
+      });
+      DB.saveWorkers(workers);
+      e.target.reset();
+      renderWorkers();
+      populateDropdowns();
+    });
+
+    function deleteWorker(id) {
+      if (confirm('Are you sure you want to remove this worker?')) {
+        let workers = DB.getWorkers().filter(w => w.id !== id);
+        DB.saveWorkers(workers);
+        renderWorkers();
+        populateDropdowns();
+      }
+    }
+
+    function renderWorkers() {
+      const tbody = document.querySelector('#workersTable tbody');
+      tbody.innerHTML = '';
+      const workers = DB.getWorkers();
+      workers.forEach(w => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${w.name}</strong></td>
+          <td><span class="badge badge-${w.role}">${w.role.toUpperCase()}</span></td>
+          <td class="age-cell">${w.age} yrs</td>
+          <td>${w.phone}</td>
+          <td class="no-print"><button class="btn btn-danger delete-btn" style="padding: 2px 8px; font-size: 0.75rem;" onclick="deleteWorker('${w.id}')">Delete</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function populateDropdowns() {
+      const workers = DB.getWorkers();
+      const logWorkerSelect = document.getElementById('logWorker');
+      const tripDriverSelect = document.getElementById('tripDriver');
+      const tripCrewSelect = document.getElementById('tripCrew');
+
+      logWorkerSelect.innerHTML = '<option value="">Select Worker</option>';
+      tripDriverSelect.innerHTML = '<option value="">Select Driver</option>';
+      tripCrewSelect.innerHTML = '';
+
+      workers.forEach(w => {
+        if (w.role === 'cyclist') {
+          logWorkerSelect.innerHTML += `<option value="${w.id}">${w.name}</option>`;
+        } else if (w.role === 'driver') {
+          tripDriverSelect.innerHTML += `<option value="${w.id}">${w.name}</option>`;
+        } else if (w.role === 'crew') {
+          tripCrewSelect.innerHTML += `<option value="${w.name}">${w.name}</option>`;
+        }
+      });
+    }
+
+    // Daily Shift Operations & Math Engine
+    document.getElementById('dailyShiftForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const parseVal = (id) => parseInt(document.getElementById(id).value) || 0;
+      const waxOut = parseVal('waxOut'), waxRet = parseVal('waxRet'), waxDam = parseVal('waxDam'), waxLost = parseVal('waxLost');
+      const liq250Out = parseVal('liq250Out'), liq250Ret = parseVal('liq250Ret'), liq250Dam = parseVal('liq250Dam'), liq250Lost = parseVal('liq250Lost');
+      const liq500Out = parseVal('liq500Out'), liq500Ret = parseVal('liq500Ret'), liq500Dam = parseVal('liq500Dam'), liq500Lost = parseVal('liq500Lost');
+
+      const waxSold = Math.max(0, waxOut - waxRet - waxDam - waxLost);
+      const liq250Sold = Math.max(0, liq250Out - liq250Ret - liq250Dam - liq250Lost);
+      const liq500Sold = Math.max(0, liq500Out - liq500Ret - liq500Dam - liq500Lost);
+
+      // Calculations according to specified business matrix:
+      // Wax: $1 retail, $0.10 commission
+      // Liq 250: $1 retail, $0.25 commission
+      // Liq 500: $2 retail, $0.50 commission
+      const expectedCash = (waxSold * 1.00) + (liq250Sold * 1.00) + (liq500Sold * 2.00);
+      const commission = (waxSold * 0.10) + (liq250Sold * 0.25) + (liq500Sold * 0.50);
+      const cashRemitted = parseFloat(document.getElementById('cashRemitted').value) || 0;
+      const difference = cashRemitted - expectedCash;
+
+      const logs = DB.getLogs();
+      logs.push({
+        id: 'log_' + Date.now(),
+        date: document.getElementById('logDate').value,
+        workerId: document.getElementById('logWorker').value,
+        waxSold, liq250Sold, liq500Sold,
+        totalLost: waxLost + liq250Lost,
+        totalDamaged: waxDam + liq250Dam + liq500Dam,
+        expectedCash,
+        cashRemitted,
+        difference,
+        commission
+      });
+
+      DB.saveLogs(logs);
+      e.target.reset();
+      renderLogs();
+    });
+
+    function deleteLog(id) {
+      if (confirm('Delete this daily log?')) {
+        let logs = DB.getLogs().filter(l => l.id !== id);
+        DB.saveLogs(logs);
+        renderLogs();
+      }
+    }
+
+    function renderLogs() {
+      const tbody = document.querySelector('#dailyTable tbody');
+      tbody.innerHTML = '';
+      const logs = DB.getLogs();
+      const workers = DB.getWorkers();
+
+      logs.forEach(l => {
+        const worker = workers.find(w => w.id === l.workerId) || { name: 'Unknown' };
+        const diffClass = l.difference < 0 ? 'text-danger' : (l.difference > 0 ? 'text-success' : '');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${l.date}</td>
+          <td><strong>${worker.name}</strong></td>
+          <td>Wax: ${l.waxSold} | 250: ${l.liq250Sold} | 500: ${l.liq500Sold}</td>
+          <td>Lost: ${l.totalLost} | Damaged: ${l.totalDamaged}</td>
+          <td>$${l.expectedCash.toFixed(2)}</td>
+          <td>$${l.cashRemitted.toFixed(2)}</td>
+          <td class="${diffClass}">$${l.difference.toFixed(2)}</td>
+          <td class="text-success">$${l.commission.toFixed(2)}</td>
+          <td class="no-print"><button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.75rem;" onclick="deleteLog('${l.id}')">Delete</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Driver Trips Operations
+    document.getElementById('tripForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const type = document.getElementById('tripType').value;
+      const rate = type === 'local' ? 5.00 : 10.00;
+      const crewSelect = document.getElementById('tripCrew');
+      const selectedCrew = Array.from(crewSelect.selectedOptions).map(opt => opt.value);
+
+      const trips = DB.getTrips();
+      trips.push({
+        id: 'tr_' + Date.now(),
+        date: document.getElementById('tripDate').value,
+        driverId: document.getElementById('tripDriver').value,
+        tripType: type === 'local' ? 'Local Run ($5)' : 'Out of Area Run ($10)',
+        driverFee: rate,
+        crewMembers: selectedCrew.join(', ') || 'None'
+      });
+
+      DB.saveTrips(trips);
+      e.target.reset();
+      renderTrips();
+    });
+
+    function deleteTrip(id) {
+      if (confirm('Delete this trip?')) {
+        let trips = DB.getTrips().filter(t => t.id !== id);
+        DB.saveTrips(trips);
+        renderTrips();
+      }
+    }
+
+    function renderTrips() {
+      const tbody = document.querySelector('#tripsTable tbody');
+      tbody.innerHTML = '';
+      const trips = DB.getTrips();
+      const workers = DB.getWorkers();
+
+      trips.forEach(t => {
+        const driver = workers.find(w => w.id === t.driverId) || { name: 'Unknown Driver' };
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${t.date}</td>
+          <td><strong>${driver.name}</strong></td>
+          <td>${t.tripType}</td>
+          <td class="text-success">$${t.driverFee.toFixed(2)}</td>
+          <td>${t.crewMembers}</td>
+          <td class="no-print"><button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.75rem;" onclick="deleteTrip('${t.id}')">Delete</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Weekly Consolidated Reports & Sales Leaderboard
+    function renderReports() {
+      const workers = DB.getWorkers();
+      const logs = DB.getLogs();
+      const trips = DB.getTrips();
+
+      const workerStats = {};
+
+      workers.forEach(w => {
+        workerStats[w.id] = {
+          name: w.name,
+          role: w.role,
+          unitsSold: 0,
+          lostDamaged: 0,
+          earnings: 0
+        };
+      });
+
+      logs.forEach(l => {
+        if (workerStats[l.workerId]) {
+          const sold = l.waxSold + l.liq250Sold + l.liq500Sold;
+          workerStats[l.workerId].unitsSold += sold;
+          workerStats[l.workerId].lostDamaged += (l.totalLost + l.totalDamaged);
+          workerStats[l.workerId].earnings += l.commission;
+        }
+      });
+
+      trips.forEach(t => {
+        if (workerStats[t.driverId]) {
+          workerStats[t.driverId].earnings += t.driverFee;
+        }
+      });
+
+      // Render Leaderboard (Cyclists sorted by volume)
+      const cyclistList = Object.values(workerStats)
+        .filter(w => w.role === 'cyclist')
+        .sort((a, b) => b.unitsSold - a.unitsSold);
+
+      const lbContainer = document.getElementById('leaderboardList');
+      lbContainer.innerHTML = '';
+
+      if (cyclistList.length === 0) {
+        lbContainer.innerHTML = '<p style="color: #64748b;">No sales activity recorded yet.</p>';
+      } else {
+        cyclistList.forEach((c, idx) => {
+          const div = document.createElement('div');
+          div.className = 'leaderboard-card';
+          div.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <span class="leaderboard-rank">#${idx + 1}</span>
+              <div>
+                <strong>${c.name}</strong>
+                <div style="font-size: 0.8rem; color: #64748b;">Total Units Moved: ${c.unitsSold}</div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <span class="text-success" style="font-size: 1.1rem;">$${c.earnings.toFixed(2)}</span>
+              <div style="font-size: 0.75rem; color: #64748b;">Earned Commission</div>
+            </div>
+          `;
+          lbContainer.appendChild(div);
+        });
+      }
+
+      // Render Consolidated Table
+      const summaryTbody = document.querySelector('#summaryTable tbody');
+      summaryTbody.innerHTML = '';
+      Object.values(workerStats).forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${s.name}</strong></td>
+          <td><span class="badge badge-${s.role}">${s.role.toUpperCase()}</span></td>
+          <td>${s.unitsSold}</td>
+          <td>${s.lostDamaged}</td>
+          <td class="text-success">$${s.earnings.toFixed(2)}</td>
+        `;
+        summaryTbody.appendChild(tr);
+      });
+    }
+
+    // Set today's date automatically on load
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('logDate').value = today;
+    document.getElementById('tripDate').value = today;
+
+    // Boot
+    renderWorkers();
+    populateDropdowns();
+    renderLogs();
+    renderTrips();
+  </script>
+</body>
+</html>
