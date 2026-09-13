@@ -11,6 +11,7 @@
       --accent: #d97706;
       --success: #15803d;
       --danger: #b91c1c;
+      --warning: #b45309;
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --border: #cbd5e1;
@@ -176,6 +177,7 @@
 
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-success { background: var(--success); color: #fff; }
+    .btn-warning { background: var(--warning); color: #fff; }
     .btn-danger { background: var(--danger); color: #fff; }
     .btn-print { background: #475569; color: #fff; }
     .btn:hover { opacity: 0.9; }
@@ -214,6 +216,8 @@
     .badge-cyclist { background: #e0f2fe; color: #0369a1; }
     .badge-driver { background: #fef3c7; color: #b45309; }
     .badge-crew { background: #f3e8ff; color: #7e22ce; }
+    .badge-pending { background: #fef08a; color: #854d0e; }
+    .badge-completed { background: #dcfce7; color: #166534; }
 
     .leaderboard-card {
       display: flex;
@@ -235,6 +239,36 @@
 
     .text-danger { color: var(--danger); font-weight: 700; }
     .text-success { color: var(--success); font-weight: 700; }
+    .text-wax { color: #b45309; font-weight: 600; }
+    .text-liquid { color: #0284c7; font-weight: 600; }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      width: 95%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
 
     /* Print Template Restrictions */
     @media print {
@@ -244,7 +278,7 @@
         padding-bottom: 0;
       }
 
-      nav, .btn, .no-print, input[type="submit"], form, .delete-btn {
+      nav, .btn, .no-print, form, .modal {
         display: none !important;
       }
 
@@ -264,10 +298,8 @@
 
       .tab-content {
         display: block !important;
-        page-break-after: auto;
       }
 
-      /* Hide worker age strictly during printout */
       .worker-age, .age-col, td.age-cell, th.age-header {
         display: none !important;
       }
@@ -312,26 +344,27 @@
   </header>
 
   <nav class="no-print">
-    <button class="tab-btn active" onclick="switchTab('tab-daily')">Daily Log & Reconciliation</button>
+    <button class="tab-btn active" onclick="switchTab('tab-daily')">Daily Dispatch & Reconciliation</button>
     <button class="tab-btn" onclick="switchTab('tab-driver')">Driver Trips & Crew</button>
-    <button class="tab-btn" onclick="switchTab('tab-workers')">Worker Directory</button>
+    <button class="tab-btn" onclick="switchTab('tab-workers')">Worker Directory & Profiles</button>
     <button class="tab-btn" onclick="switchTab('tab-reports')">Weekly Reports & Leaderboard</button>
   </nav>
 
   <main>
     <!-- TAB 1: DAILY SALES LOG (CYCLISTS / FIELD AGENTS) -->
     <section id="tab-daily" class="tab-content active">
+      <!-- Morning Dispatch Form -->
       <div class="card no-print">
-        <h2>Record Daily Field Agent Shift</h2>
-        <form id="dailyShiftForm">
+        <h2>Morning Dispatch (Stock Check-Out)</h2>
+        <form id="morningDispatchForm">
           <div class="grid-2">
             <div class="form-group">
-              <label>Date</label>
-              <input type="date" id="logDate" required />
+              <label>Dispatch Date</label>
+              <input type="date" id="dispatchDate" required />
             </div>
             <div class="form-group">
               <label>Worker (Cyclist / Field Agent)</label>
-              <select id="logWorker" required>
+              <select id="dispatchWorker" required>
                 <option value="">Select Worker</option>
               </select>
             </div>
@@ -341,60 +374,37 @@
             <thead>
               <tr>
                 <th>Product Line</th>
-                <th>Retail</th>
-                <th>Comm.</th>
-                <th>Issued (AM)</th>
-                <th>Returned</th>
-                <th>Damaged</th>
-                <th>Lost</th>
+                <th>Retail Price</th>
+                <th>Units Issued (Morning Out)</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td><strong>Wax Polish (300–350ml)</strong></td>
                 <td>$1.00</td>
-                <td>$0.10</td>
-                <td><input type="number" id="waxOut" min="0" value="0" style="width: 70px;" /></td>
-                <td><input type="number" id="waxRet" min="0" value="0" style="width: 70px;" /></td>
-                <td><input type="number" id="waxDam" min="0" value="0" style="width: 70px;" /></td>
-                <td><input type="number" id="waxLost" min="0" value="0" style="width: 70px;" /></td>
+                <td><input type="number" id="m_waxOut" min="0" value="0" required /></td>
               </tr>
               <tr>
                 <td><strong>Liquid Polish (250ml)</strong></td>
                 <td>$1.00</td>
-                <td>$0.25</td>
-                <td><input type="number" id="liq250Out" min="0" value="0" style="width: 70px;" /></td>
-                <td><input type="number" id="liq250Ret" min="0" value="0" style="width: 70px;" /></td>
-                <td><input type="number" id="liq250Dam" min="0" value="0" style="width: 70px;" /></td>
-                <td><input type="number" id="liq250Lost" min="0" value="0" style="width: 70px;" /></td>
+                <td><input type="number" id="m_liq250Out" min="0" value="0" required /></td>
               </tr>
               <tr>
                 <td><strong>Liquid Polish (500ml)</strong></td>
                 <td>$2.00</td>
-                <td>$0.50</td>
-                <td><input type="number" id="liq500Out" min="0" value="0" style="width: 70px;" /></td>
-                <td><input type="number" id="liq500Ret" min="0" value="0" style="width: 70px;" /></td>
-                <td><input type="number" id="liq500Dam" min="0" value="0" style="width: 70px;" /></td>
-                <td><input type="number" id="liq500Lost" min="0" value="0" style="width: 70px;" /></td>
+                <td><input type="number" id="m_liq500Out" min="0" value="0" required /></td>
               </tr>
             </tbody>
           </table>
 
-          <div class="grid-2">
-            <div class="form-group">
-              <label>Total Cash Remitted ($)</label>
-              <input type="number" step="0.01" id="cashRemitted" placeholder="0.00" required />
-            </div>
-            <div class="form-group" style="display: flex; align-items: flex-end;">
-              <button type="submit" class="btn btn-primary" style="width: 100%;">Save Daily Shift Record</button>
-            </div>
-          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Save Morning Dispatch</button>
         </form>
       </div>
 
+      <!-- Log Records Table -->
       <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h2>Daily Field Agent Shift Reconciliations</h2>
+          <h2>Field Shifts & Reconciliation</h2>
           <button onclick="window.print()" class="btn btn-print no-print">Print Shift Report</button>
         </div>
         <div class="table-container">
@@ -403,12 +413,15 @@
               <tr>
                 <th>Date</th>
                 <th>Worker</th>
+                <th>Issued (AM)</th>
                 <th>Sold (Wax/250/500)</th>
-                <th>Lost/Damaged</th>
-                <th>Expected Cash</th>
-                <th>Remitted Cash</th>
-                <th>Difference</th>
-                <th>Commission Due</th>
+                <th>Lost/Dam</th>
+                <th>Expected ($)</th>
+                <th>Remitted ($)</th>
+                <th>Wax Comm ($)</th>
+                <th>Liquid Comm ($)</th>
+                <th>Total Comm ($)</th>
+                <th>Status</th>
                 <th class="no-print">Action</th>
               </tr>
             </thead>
@@ -417,6 +430,59 @@
         </div>
       </div>
     </section>
+
+    <!-- EVENING CHECK-IN MODAL POPUP -->
+    <div id="checkInModal" class="modal">
+      <div class="modal-content">
+        <h2 id="modalTitle">Evening Return & Reconciliation</h2>
+        <div id="modalIssuedSummary" style="font-size: 0.9rem; margin-bottom: 1rem; background: #f1f5f9; padding: 0.5rem; border-radius: 4px;"></div>
+        
+        <form id="eveningCheckInForm">
+          <input type="hidden" id="checkInLogId" />
+
+          <table style="margin-bottom: 1rem; font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Returned</th>
+                <th>Damaged</th>
+                <th>Lost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Wax Polish</td>
+                <td><input type="number" id="e_waxRet" min="0" value="0" required /></td>
+                <td><input type="number" id="e_waxDam" min="0" value="0" required /></td>
+                <td><input type="number" id="e_waxLost" min="0" value="0" required /></td>
+              </tr>
+              <tr>
+                <td>Liquid 250ml</td>
+                <td><input type="number" id="e_liq250Ret" min="0" value="0" required /></td>
+                <td><input type="number" id="e_liq250Dam" min="0" value="0" required /></td>
+                <td><input type="number" id="e_liq250Lost" min="0" value="0" required /></td>
+              </tr>
+              <tr>
+                <td>Liquid 500ml</td>
+                <td><input type="number" id="e_liq500Ret" min="0" value="0" required /></td>
+                <td><input type="number" id="e_liq500Dam" min="0" value="0" required /></td>
+                <td><input type="number" id="e_liq500Lost" min="0" value="0" required /></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="form-group">
+            <label>Total Cash Remitted ($)</label>
+            <input type="number" step="0.01" id="e_cashRemitted" placeholder="0.00" required />
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+            <button type="submit" class="btn btn-success" style="flex: 1;">Complete Reconciliation</button>
+            <button type="button" class="btn btn-danger" onclick="closeCheckInModal()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <!-- TAB 2: DRIVER TRIPS & CAR CREW -->
     <section id="tab-driver" class="tab-content">
@@ -477,7 +543,7 @@
       </div>
     </section>
 
-    <!-- TAB 3: WORKER DIRECTORY -->
+    <!-- TAB 3: WORKER DIRECTORY & PROFILES -->
     <section id="tab-workers" class="tab-content">
       <div class="card no-print">
         <h2>Register New Worker</h2>
@@ -511,7 +577,7 @@
       </div>
 
       <div class="card">
-        <h2>Active Team Directory</h2>
+        <h2>Active Team Directory & Commission History</h2>
         <div class="table-container">
           <table id="workersTable">
             <thead>
@@ -520,6 +586,9 @@
                 <th>Role</th>
                 <th class="age-header">Age (Internal Only)</th>
                 <th>Contact</th>
+                <th>Wax Commission</th>
+                <th>Liquid Commission</th>
+                <th>Total Earned</th>
                 <th class="no-print">Action</th>
               </tr>
             </thead>
@@ -540,15 +609,19 @@
       </div>
 
       <div class="card">
-        <h2>Consolidated Payout Summary (Commissions & Driver Fees)</h2>
+        <h2>Consolidated Payout Summary (Disaggregated Commissions)</h2>
         <div class="table-container">
           <table id="summaryTable">
             <thead>
               <tr>
                 <th>Worker Name</th>
                 <th>Role</th>
-                <th>Units Sold</th>
-                <th>Lost/Damaged Tally</th>
+                <th>Wax Sold</th>
+                <th>Liquid Sold</th>
+                <th>Lost/Damaged</th>
+                <th>Wax Comm ($)</th>
+                <th>Liquid Comm ($)</th>
+                <th>Driver Trips ($)</th>
                 <th>Total Earnings ($)</th>
               </tr>
             </thead>
@@ -571,7 +644,7 @@
   </main>
 
   <script>
-    // System Data Initialization with LocalStorage
+    // Storage Initializer
     const DB = {
       getWorkers: () => JSON.parse(localStorage.getItem('knk_workers') || '[]'),
       saveWorkers: (data) => localStorage.setItem('knk_workers', JSON.stringify(data)),
@@ -583,21 +656,22 @@
       saveTitle: (title) => localStorage.setItem('knk_title', title)
     };
 
-    // Navigation Tab Controller
+    // Tab Switching
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       event.currentTarget.classList.add('active');
       if (tabId === 'tab-reports') renderReports();
+      if (tabId === 'tab-workers') renderWorkers();
     }
 
-    // Editable Company Title
+    // Editable Header
     const titleEl = document.getElementById('companyName');
     titleEl.innerText = DB.getTitle();
     titleEl.addEventListener('blur', () => DB.saveTitle(titleEl.innerText.trim()));
 
-    // Worker Registration & Render
+    // Worker Registration & Calculation
     document.getElementById('workerForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const workers = DB.getWorkers();
@@ -627,14 +701,39 @@
       const tbody = document.querySelector('#workersTable tbody');
       tbody.innerHTML = '';
       const workers = DB.getWorkers();
+      const logs = DB.getLogs();
+      const trips = DB.getTrips();
+
       workers.forEach(w => {
+        let waxComm = 0;
+        let liqComm = 0;
+        let driverFee = 0;
+
+        if (w.role === 'cyclist') {
+          logs.filter(l => l.workerId === w.id && l.status === 'COMPLETED').forEach(l => {
+            waxComm += (l.waxCommission || 0);
+            liqComm += (l.liquidCommission || 0);
+          });
+        } else if (w.role === 'driver') {
+          trips.filter(t => t.driverId === w.id).forEach(t => {
+            driverFee += t.driverFee;
+          });
+        }
+
+        const totalEarned = waxComm + liqComm + driverFee;
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><strong>${w.name}</strong></td>
           <td><span class="badge badge-${w.role}">${w.role.toUpperCase()}</span></td>
           <td class="age-cell">${w.age} yrs</td>
           <td>${w.phone}</td>
-          <td class="no-print"><button class="btn btn-danger delete-btn" style="padding: 2px 8px; font-size: 0.75rem;" onclick="deleteWorker('${w.id}')">Delete</button></td>
+          <td class="text-wax">${w.role === 'cyclist' ? '$' + waxComm.toFixed(2) : '-'}</td>
+          <td class="text-liquid">${w.role === 'cyclist' ? '$' + liqComm.toFixed(2) : '-'}</td>
+          <td class="text-success"><strong>$${totalEarned.toFixed(2)}</strong></td>
+          <td class="no-print">
+            <button class="btn btn-danger delete-btn" style="padding: 2px 8px; font-size: 0.75rem;" onclick="deleteWorker('${w.id}')">Delete</button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
@@ -642,17 +741,17 @@
 
     function populateDropdowns() {
       const workers = DB.getWorkers();
-      const logWorkerSelect = document.getElementById('logWorker');
+      const dispatchWorkerSelect = document.getElementById('dispatchWorker');
       const tripDriverSelect = document.getElementById('tripDriver');
       const tripCrewSelect = document.getElementById('tripCrew');
 
-      logWorkerSelect.innerHTML = '<option value="">Select Worker</option>';
+      dispatchWorkerSelect.innerHTML = '<option value="">Select Worker</option>';
       tripDriverSelect.innerHTML = '<option value="">Select Driver</option>';
       tripCrewSelect.innerHTML = '';
 
       workers.forEach(w => {
         if (w.role === 'cyclist') {
-          logWorkerSelect.innerHTML += `<option value="${w.id}">${w.name}</option>`;
+          dispatchWorkerSelect.innerHTML += `<option value="${w.id}">${w.name}</option>`;
         } else if (w.role === 'driver') {
           tripDriverSelect.innerHTML += `<option value="${w.id}">${w.name}</option>`;
         } else if (w.role === 'crew') {
@@ -661,52 +760,117 @@
       });
     }
 
-    // Daily Shift Operations & Math Engine
-    document.getElementById('dailyShiftForm').addEventListener('submit', (e) => {
+    // Step 1: Morning Dispatch Handler
+    document.getElementById('morningDispatchForm').addEventListener('submit', (e) => {
       e.preventDefault();
-
-      const parseVal = (id) => parseInt(document.getElementById(id).value) || 0;
-      const waxOut = parseVal('waxOut'), waxRet = parseVal('waxRet'), waxDam = parseVal('waxDam'), waxLost = parseVal('waxLost');
-      const liq250Out = parseVal('liq250Out'), liq250Ret = parseVal('liq250Ret'), liq250Dam = parseVal('liq250Dam'), liq250Lost = parseVal('liq250Lost');
-      const liq500Out = parseVal('liq500Out'), liq500Ret = parseVal('liq500Ret'), liq500Dam = parseVal('liq500Dam'), liq500Lost = parseVal('liq500Lost');
-
-      const waxSold = Math.max(0, waxOut - waxRet - waxDam - waxLost);
-      const liq250Sold = Math.max(0, liq250Out - liq250Ret - liq250Dam - liq250Lost);
-      const liq500Sold = Math.max(0, liq500Out - liq500Ret - liq500Dam - liq500Lost);
-
-      // Calculations according to specified business matrix:
-      // Wax: $1 retail, $0.10 commission
-      // Liq 250: $1 retail, $0.25 commission
-      // Liq 500: $2 retail, $0.50 commission
-      const expectedCash = (waxSold * 1.00) + (liq250Sold * 1.00) + (liq500Sold * 2.00);
-      const commission = (waxSold * 0.10) + (liq250Sold * 0.25) + (liq500Sold * 0.50);
-      const cashRemitted = parseFloat(document.getElementById('cashRemitted').value) || 0;
-      const difference = cashRemitted - expectedCash;
-
       const logs = DB.getLogs();
       logs.push({
         id: 'log_' + Date.now(),
-        date: document.getElementById('logDate').value,
-        workerId: document.getElementById('logWorker').value,
-        waxSold, liq250Sold, liq500Sold,
-        totalLost: waxLost + liq250Lost,
-        totalDamaged: waxDam + liq250Dam + liq500Dam,
-        expectedCash,
-        cashRemitted,
-        difference,
-        commission
+        date: document.getElementById('dispatchDate').value,
+        workerId: document.getElementById('dispatchWorker').value,
+        status: 'PENDING',
+        // Morning Out
+        waxOut: parseInt(document.getElementById('m_waxOut').value) || 0,
+        liq250Out: parseInt(document.getElementById('m_liq250Out').value) || 0,
+        liq500Out: parseInt(document.getElementById('m_liq500Out').value) || 0,
+        // Evening fields empty initially
+        waxSold: 0, liq250Sold: 0, liq500Sold: 0,
+        totalLost: 0, totalDamaged: 0,
+        expectedCash: 0, cashRemitted: 0, difference: 0,
+        waxCommission: 0, liquidCommission: 0, totalCommission: 0
       });
 
       DB.saveLogs(logs);
       e.target.reset();
+      document.getElementById('dispatchDate').value = today;
       renderLogs();
     });
 
+    // Step 2: Evening Check-In Modal Functions
+    function openCheckInModal(id) {
+      const log = DB.getLogs().find(l => l.id === id);
+      if (!log) return;
+
+      const worker = DB.getWorkers().find(w => w.id === log.workerId) || { name: 'Unknown' };
+      document.getElementById('checkInLogId').value = log.id;
+      document.getElementById('modalTitle').innerText = `Evening Check-In: ${worker.name} (${log.date})`;
+      document.getElementById('modalIssuedSummary').innerHTML = `
+        <strong>Issued this morning:</strong> Wax: ${log.waxOut} | Liquid 250ml: ${log.liq250Out} | Liquid 500ml: ${log.liq500Out}
+      `;
+
+      // Pre-fill or reset inputs
+      document.getElementById('e_waxRet').value = 0;
+      document.getElementById('e_waxDam').value = 0;
+      document.getElementById('e_waxLost').value = 0;
+      document.getElementById('e_liq250Ret').value = 0;
+      document.getElementById('e_liq250Dam').value = 0;
+      document.getElementById('e_liq250Lost').value = 0;
+      document.getElementById('e_liq500Ret').value = 0;
+      document.getElementById('e_liq500Dam').value = 0;
+      document.getElementById('e_liq500Lost').value = 0;
+      document.getElementById('e_cashRemitted').value = '';
+
+      document.getElementById('checkInModal').classList.add('active');
+    }
+
+    function closeCheckInModal() {
+      document.getElementById('checkInModal').classList.remove('active');
+    }
+
+    document.getElementById('eveningCheckInForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const logId = document.getElementById('checkInLogId').value;
+      const logs = DB.getLogs();
+      const log = logs.find(l => l.id === logId);
+
+      if (!log) return;
+
+      const waxRet = parseInt(document.getElementById('e_waxRet').value) || 0;
+      const waxDam = parseInt(document.getElementById('e_waxDam').value) || 0;
+      const waxLost = parseInt(document.getElementById('e_waxLost').value) || 0;
+
+      const liq250Ret = parseInt(document.getElementById('e_liq250Ret').value) || 0;
+      const liq250Dam = parseInt(document.getElementById('e_liq250Dam').value) || 0;
+      const liq250Lost = parseInt(document.getElementById('e_liq250Lost').value) || 0;
+
+      const liq500Ret = parseInt(document.getElementById('e_liq500Ret').value) || 0;
+      const liq500Dam = parseInt(document.getElementById('e_liq500Dam').value) || 0;
+      const liq500Lost = parseInt(document.getElementById('e_liq500Lost').value) || 0;
+
+      // Units Sold Calculations
+      log.waxSold = Math.max(0, log.waxOut - waxRet - waxDam - waxLost);
+      log.liq250Sold = Math.max(0, log.liq250Out - liq250Ret - liq250Dam - liq250Lost);
+      log.liq500Sold = Math.max(0, log.liq500Out - liq500Ret - liq500Dam - liq500Lost);
+
+      log.totalLost = waxLost + liq250Lost + liq500Lost;
+      log.totalDamaged = waxDam + liq250Dam + liq500Dam;
+
+      // Financials
+      log.expectedCash = (log.waxSold * 1.00) + (log.liq250Sold * 1.00) + (log.liq500Sold * 2.00);
+      log.cashRemitted = parseFloat(document.getElementById('e_cashRemitted').value) || 0;
+      log.difference = log.cashRemitted - log.expectedCash;
+
+      // Disaggregated Commissions:
+      // Wax: $0.10/unit
+      // Liquids: 250ml ($0.25) + 500ml ($0.50)
+      log.waxCommission = log.waxSold * 0.10;
+      log.liquidCommission = (log.liq250Sold * 0.25) + (log.liq500Sold * 0.50);
+      log.totalCommission = log.waxCommission + log.liquidCommission;
+
+      log.status = 'COMPLETED';
+
+      DB.saveLogs(logs);
+      closeCheckInModal();
+      renderLogs();
+      renderWorkers();
+    });
+
     function deleteLog(id) {
-      if (confirm('Delete this daily log?')) {
+      if (confirm('Delete this record?')) {
         let logs = DB.getLogs().filter(l => l.id !== id);
         DB.saveLogs(logs);
         renderLogs();
+        renderWorkers();
       }
     }
 
@@ -720,22 +884,42 @@
         const worker = workers.find(w => w.id === l.workerId) || { name: 'Unknown' };
         const diffClass = l.difference < 0 ? 'text-danger' : (l.difference > 0 ? 'text-success' : '');
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${l.date}</td>
-          <td><strong>${worker.name}</strong></td>
-          <td>Wax: ${l.waxSold} | 250: ${l.liq250Sold} | 500: ${l.liq500Sold}</td>
-          <td>Lost: ${l.totalLost} | Damaged: ${l.totalDamaged}</td>
-          <td>$${l.expectedCash.toFixed(2)}</td>
-          <td>$${l.cashRemitted.toFixed(2)}</td>
-          <td class="${diffClass}">$${l.difference.toFixed(2)}</td>
-          <td class="text-success">$${l.commission.toFixed(2)}</td>
-          <td class="no-print"><button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.75rem;" onclick="deleteLog('${l.id}')">Delete</button></td>
-        `;
+
+        if (l.status === 'PENDING') {
+          tr.innerHTML = `
+            <td>${l.date}</td>
+            <td><strong>${worker.name}</strong></td>
+            <td>Wax: ${l.waxOut} | 250: ${l.liq250Out} | 500: ${l.liq500Out}</td>
+            <td colspan="6" style="text-align: center; color: #854d0e; font-style: italic;">Currently out on route...</td>
+            <td><span class="badge badge-pending">PENDING RETURN</span></td>
+            <td class="no-print">
+              <button class="btn btn-warning" style="padding: 3px 8px; font-size: 0.75rem; margin-right: 4px;" onclick="openCheckInModal('${l.id}')">Check-In</button>
+              <button class="btn btn-danger" style="padding: 3px 8px; font-size: 0.75rem;" onclick="deleteLog('${l.id}')">Delete</button>
+            </td>
+          `;
+        } else {
+          tr.innerHTML = `
+            <td>${l.date}</td>
+            <td><strong>${worker.name}</strong></td>
+            <td>Wax: ${l.waxOut} | 250: ${l.liq250Out} | 500: ${l.liq500Out}</td>
+            <td>Wax: ${l.waxSold} | 250: ${l.liq250Sold} | 500: ${l.liq500Sold}</td>
+            <td>Lost: ${l.totalLost} | Dam: ${l.totalDamaged}</td>
+            <td>$${l.expectedCash.toFixed(2)}</td>
+            <td>$${l.cashRemitted.toFixed(2)}</td>
+            <td class="text-wax">$${(l.waxCommission || 0).toFixed(2)}</td>
+            <td class="text-liquid">$${(l.liquidCommission || 0).toFixed(2)}</td>
+            <td class="text-success"><strong>$${(l.totalCommission || 0).toFixed(2)}</strong></td>
+            <td><span class="badge badge-completed">COMPLETED</span></td>
+            <td class="no-print">
+              <button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.75rem;" onclick="deleteLog('${l.id}')">Delete</button>
+            </td>
+          `;
+        }
         tbody.appendChild(tr);
       });
     }
 
-    // Driver Trips Operations
+    // Tab 2: Vehicle Logistics
     document.getElementById('tripForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const type = document.getElementById('tripType').value;
@@ -755,14 +939,17 @@
 
       DB.saveTrips(trips);
       e.target.reset();
+      document.getElementById('tripDate').value = today;
       renderTrips();
+      renderWorkers();
     });
 
     function deleteTrip(id) {
-      if (confirm('Delete this trip?')) {
+      if (confirm('Delete this trip record?')) {
         let trips = DB.getTrips().filter(t => t.id !== id);
         DB.saveTrips(trips);
         renderTrips();
+        renderWorkers();
       }
     }
 
@@ -779,18 +966,20 @@
           <td>${t.date}</td>
           <td><strong>${driver.name}</strong></td>
           <td>${t.tripType}</td>
-          <td class="text-success">$${t.driverFee.toFixed(2)}</td>
+          <td class="text-success"><strong>$${t.driverFee.toFixed(2)}</strong></td>
           <td>${t.crewMembers}</td>
-          <td class="no-print"><button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.75rem;" onclick="deleteTrip('${t.id}')">Delete</button></td>
+          <td class="no-print">
+            <button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.75rem;" onclick="deleteTrip('${t.id}')">Delete</button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // Weekly Consolidated Reports & Sales Leaderboard
+    // Tab 4: Aggregations & Leaderboard
     function renderReports() {
       const workers = DB.getWorkers();
-      const logs = DB.getLogs();
+      const logs = DB.getLogs().filter(l => l.status === 'COMPLETED');
       const trips = DB.getTrips();
 
       const workerStats = {};
@@ -799,37 +988,46 @@
         workerStats[w.id] = {
           name: w.name,
           role: w.role,
-          unitsSold: 0,
+          waxSold: 0,
+          liqSold: 0,
+          totalUnitsSold: 0,
           lostDamaged: 0,
-          earnings: 0
+          waxCommission: 0,
+          liquidCommission: 0,
+          driverFees: 0,
+          totalEarnings: 0
         };
       });
 
       logs.forEach(l => {
         if (workerStats[l.workerId]) {
-          const sold = l.waxSold + l.liq250Sold + l.liq500Sold;
-          workerStats[l.workerId].unitsSold += sold;
+          workerStats[l.workerId].waxSold += l.waxSold;
+          workerStats[l.workerId].liqSold += (l.liq250Sold + l.liq500Sold);
+          workerStats[l.workerId].totalUnitsSold += (l.waxSold + l.liq250Sold + l.liq500Sold);
           workerStats[l.workerId].lostDamaged += (l.totalLost + l.totalDamaged);
-          workerStats[l.workerId].earnings += l.commission;
+          workerStats[l.workerId].waxCommission += (l.waxCommission || 0);
+          workerStats[l.workerId].liquidCommission += (l.liquidCommission || 0);
+          workerStats[l.workerId].totalEarnings += (l.totalCommission || 0);
         }
       });
 
       trips.forEach(t => {
         if (workerStats[t.driverId]) {
-          workerStats[t.driverId].earnings += t.driverFee;
+          workerStats[t.driverId].driverFees += t.driverFee;
+          workerStats[t.driverId].totalEarnings += t.driverFee;
         }
       });
 
-      // Render Leaderboard (Cyclists sorted by volume)
+      // Leaderboard
       const cyclistList = Object.values(workerStats)
         .filter(w => w.role === 'cyclist')
-        .sort((a, b) => b.unitsSold - a.unitsSold);
+        .sort((a, b) => b.totalUnitsSold - a.totalUnitsSold);
 
       const lbContainer = document.getElementById('leaderboardList');
       lbContainer.innerHTML = '';
 
       if (cyclistList.length === 0) {
-        lbContainer.innerHTML = '<p style="color: #64748b;">No sales activity recorded yet.</p>';
+        lbContainer.innerHTML = '<p style="color: #64748b;">No completed sales shifts recorded yet.</p>';
       } else {
         cyclistList.forEach((c, idx) => {
           const div = document.createElement('div');
@@ -839,19 +1037,24 @@
               <span class="leaderboard-rank">#${idx + 1}</span>
               <div>
                 <strong>${c.name}</strong>
-                <div style="font-size: 0.8rem; color: #64748b;">Total Units Moved: ${c.unitsSold}</div>
+                <div style="font-size: 0.8rem; color: #64748b;">
+                  Sold: ${c.waxSold} Wax | ${c.liqSold} Liquids (${c.totalUnitsSold} Total)
+                </div>
               </div>
             </div>
             <div style="text-align: right;">
-              <span class="text-success" style="font-size: 1.1rem;">$${c.earnings.toFixed(2)}</span>
-              <div style="font-size: 0.75rem; color: #64748b;">Earned Commission</div>
+              <div style="font-size: 0.8rem;">
+                <span class="text-wax">Wax: $${c.waxCommission.toFixed(2)}</span> | 
+                <span class="text-liquid">Liq: $${c.liquidCommission.toFixed(2)}</span>
+              </div>
+              <span class="text-success" style="font-size: 1.1rem; font-weight: 700;">Total: $${c.totalEarnings.toFixed(2)}</span>
             </div>
           `;
           lbContainer.appendChild(div);
         });
       }
 
-      // Render Consolidated Table
+      // Summary Table
       const summaryTbody = document.querySelector('#summaryTable tbody');
       summaryTbody.innerHTML = '';
       Object.values(workerStats).forEach(s => {
@@ -859,20 +1062,24 @@
         tr.innerHTML = `
           <td><strong>${s.name}</strong></td>
           <td><span class="badge badge-${s.role}">${s.role.toUpperCase()}</span></td>
-          <td>${s.unitsSold}</td>
+          <td>${s.waxSold}</td>
+          <td>${s.liqSold}</td>
           <td>${s.lostDamaged}</td>
-          <td class="text-success">$${s.earnings.toFixed(2)}</td>
+          <td class="text-wax">$${s.waxCommission.toFixed(2)}</td>
+          <td class="text-liquid">$${s.liquidCommission.toFixed(2)}</td>
+          <td>$${s.driverFees.toFixed(2)}</td>
+          <td class="text-success"><strong>$${s.totalEarnings.toFixed(2)}</strong></td>
         `;
         summaryTbody.appendChild(tr);
       });
     }
 
-    // Set today's date automatically on load
+    // Set Default Dates
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('logDate').value = today;
+    document.getElementById('dispatchDate').value = today;
     document.getElementById('tripDate').value = today;
 
-    // Boot
+    // Initialization
     renderWorkers();
     populateDropdowns();
     renderLogs();
